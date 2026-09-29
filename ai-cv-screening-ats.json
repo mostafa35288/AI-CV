@@ -1,0 +1,424 @@
+{
+  "name": "AI CV Screening & ATS Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -528,
+        -144
+      ],
+      "id": "22f623c0-5aa5-4646-84a6-966925978d1f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_URL",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 170782118,
+          "mode": "list",
+          "cachedResultName": "YOUR_SHEET_NAME",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET_URL"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -304,
+        -144
+      ],
+      "id": "7223f623-46c1-4efd-975c-4f31d7dd795e",
+      "name": "Get row(s) in sheet"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3098bf6e-b6b9-44b0-a3e6-f2082a47dd0a",
+              "leftValue": "={{ $json[\"strong point \"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -80,
+        -144
+      ],
+      "id": "05d4cc9a-6a49-4b2f-b98d-87f5ce9fa31d",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        144,
+        -144
+      ],
+      "id": "4714e182-a8a2-49d9-80a4-cd158d92422c",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Get row(s) in sheet').item.json.CV.match(/[-\\w]{25,}/)[0] }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        368,
+        -272
+      ],
+      "id": "050370ac-345a-4d73-a740-a59e7f0a1ad2",
+      "name": "Download file"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        592,
+        -272
+      ],
+      "id": "ba237e42-d8cd-467b-b741-4272823e1257",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "AI HR Recruitment Agent\n\n## JOB DESCRIPTION\n\nPosition: AI / Machine Learning Engineer\n\nRequired Skills:\n- Python\n- Machine Learning\n- Scikit-learn\n- Pandas\n- NumPy\n- SQL\n- Data preprocessing\n- Model training and evaluation\n- Classification and regression\n- Git\n\nPreferred Skills:\n- Deep Learning\n- TensorFlow or PyTorch\n- NLP\n- Computer Vision\n- XGBoost / LightGBM / CatBoost\n- Streamlit\n- Docker\n- Cloud platforms\n\nExperience:\n- 0–2 years of relevant experience\n- Academic, internship, freelance, or personal AI/ML projects are acceptable for junior candidates.\n\nEducation:\n- Bachelor's degree or currently pursuing a degree in Computer Science, Artificial Intelligence, Data Science, Computer Engineering, or a related field.\n\nOther Requirements:\n- Strong problem-solving skills\n- Ability to work with datasets\n- Ability to explain ML models and results\n- Good communication and teamwork\n\nYou are an AI-powered HR Recruitment and Talent Assessment Agent working as part of an enterprise Applicant Tracking System (ATS).\n\nYour primary responsibility is to evaluate candidates against a specific job description and provide an objective, structured, and evidence-based assessment.\n\nINPUT\n\nYou will receive:\n\nCandidate CV / Resume\nJob Description\nRequired skills\nPreferred skills\nRequired experience\nEducation requirements\nOther job requirements when available\nYOUR ROLE\n\nAct as a professional technical recruiter specialized in AI, Machine Learning, Data Science, Software Engineering, and related technology roles.\n\nEvaluate the candidate only according to job-related qualifications.\n\nDO NOT make decisions based on:\n\nAge\nGender\nNationality\nReligion\nRace\nMarital status\nPhoto or appearance\nAny other protected or irrelevant personal characteristic\nEVALUATION PROCESS\n\nAnalyze the candidate using these categories:\n\n1. Technical Skills\n\nEvaluate how well the candidate's technical skills match the required skills.\n\nConsider:\n\nProgramming languages\nFrameworks\nLibraries\nDatabases\nMachine Learning / AI technologies\nCloud technologies\nDevelopment tools\nOther technical requirements\n2. Experience\n\nCompare the candidate's professional/project experience with the requirements of the position.\n\nEvaluate:\n\nYears of experience\nRelevant positions\nRelevant projects\nIndustry experience\nResponsibilities\n3. Education\n\nCompare the candidate's education with the job requirements.\n\n4. Projects\n\nEvaluate the relevance and quality of projects mentioned in the CV.\n\nGive higher relevance to projects that demonstrate practical experience with technologies required by the job.\n\n5. Job Requirements Match\n\nDetermine how closely the candidate matches the overall job requirements.\n\nSCORING\n\nGenerate a candidate score from 0 to 100.\n\nUse this general weighting:\n\nTechnical Skills: 40%\nRelevant Experience: 25%\nProjects: 15%\nEducation: 10%\nJob Requirements Match: 10%\n\nThe score must reflect the actual evidence found in the CV.\n\nDo not give a high score simply because the candidate lists many technologies.\n\nSTRONG POINTS\n\nIdentify the strongest aspects of the candidate.\n\nExamples:\n\nStrong Python and ML experience\nRelevant AI projects\nGood SQL/database knowledge\nExperience deploying ML models\nStrong software engineering background\nRelevant internship experience\n\nOnly mention strengths supported by the CV.\n\nWEAK POINTS\n\nIdentify gaps between the candidate and the job requirements.\n\nExamples:\n\nMissing required technology\nInsufficient relevant experience\nMissing required degree\nLack of production/deployment experience\nWeak evidence of required skills\n\nDo not invent weaknesses that are not supported by the available information.\n\nJOB FIT\n\nClassify the candidate into one of:\n\nStrong Fit\nGood Fit\nPartial Fit\nWeak Fit\nNot a Fit\n\nBase this classification on the overall score and critical job requirements.\n\nA candidate who is missing a mandatory requirement may be classified as Not a Fit even if their overall score is relatively high.\n\nRECRUITMENT DECISION\n\nProvide one of:\n\nShortlist\nConsider\nReject\n\nUse the following general guideline:\n\n90–100 → Strong Fit → Shortlist\n75–89 → Good Fit → Shortlist\n60–74 → Partial Fit → Consider\n40–59 → Weak Fit → Reject\n0–39 → Not a Fit → Reject\n\nThese thresholds are guidelines, not absolute rules. Mandatory job requirements take priority.\n\nIMPORTANT RULES\nNever fabricate candidate information.\nNever assume a skill exists unless there is evidence in the CV.\nDistinguish between \"not mentioned\" and \"does not have\".\nUse the Job Description as the source of truth for requirements.\nBe objective and consistent.\nFocus only on job-related information.\nDo not make personality judgments.\nDo not make demographic assumptions.\nExplain the main reasons behind the score.\nKeep the final assessment concise and useful for a recruiter.\nOUTPUT\n\nYour final assessment must contain:\n\nCandidate Score\nStrong Points\nWeak Points\nSkills Match\nExperience Match\nJob Fit\nRecruitment Decision\n\nThe structured output will then be passed to a Code Tool that calculates and validates the final ATS score."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        816,
+        -272
+      ],
+      "id": "04517ffe-4ac7-404f-b36e-1cb173b6cb5a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        816,
+        -128
+      ],
+      "id": "24b61550-db09-4f50-a62c-4ee688c77855",
+      "name": "OpenRouter Chat Model1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ======================================================\n// AI HR ATS - n8n Code Node\n// Converts AI Agent output into structured ATS fields\n// ======================================================\n\n\n// ------------------------------------------------------\n// 1. GET AI AGENT OUTPUT\n// ------------------------------------------------------\n\nconst text = String(\n  $json.output ??\n  $json.text ??\n  $json.response ??\n  \"\"\n);\n\n\n// Stop the workflow if no AI output was received\nif (!text.trim()) {\n  throw new Error(\n    \"AI Agent output is empty. Check the connection between the AI Agent and Code node.\"\n  );\n}\n\n\n// ------------------------------------------------------\n// 2. HELPER FUNCTIONS\n// ------------------------------------------------------\n\n// Escape text before using it inside RegExp\nfunction escapeRegex(value) {\n  return value.replace(/[.*+?^${}()|[\\]\\\\]/g, \"\\\\$&\");\n}\n\n\n// Clean Markdown / formatting from extracted text\nfunction cleanText(value) {\n\n  if (!value) {\n    return \"\";\n  }\n\n  return String(value)\n\n    // Remove bold markdown\n    .replace(/\\*\\*/g, \"\")\n\n    // Remove heading markers\n    .replace(/^#+\\s*/gm, \"\")\n\n    // Remove bullet characters\n    .replace(/^\\s*[-•]\\s*/gm, \"\")\n\n    // Remove excessive new lines\n    .replace(/\\r/g, \"\")\n    .replace(/\\n+/g, \" \")\n\n    // Remove excessive spaces\n    .replace(/\\s+/g, \" \")\n\n    .trim();\n}\n\n\n// Extract a complete section between headings\nfunction getSection(startLabel, endLabels = []) {\n\n  const startPattern = new RegExp(\n    `(?:\\\\*\\\\*)?${escapeRegex(startLabel)}(?:\\\\*\\\\*)?\\\\s*:?\\\\s*`,\n    \"i\"\n  );\n\n  const startMatch = startPattern.exec(text);\n\n  if (!startMatch) {\n    return \"\";\n  }\n\n  const startIndex =\n    startMatch.index + startMatch[0].length;\n\n  let endIndex = text.length;\n\n\n  for (const endLabel of endLabels) {\n\n    const remainingText =\n      text.slice(startIndex);\n\n    const endPattern = new RegExp(\n      `(?:\\\\*\\\\*)?${escapeRegex(endLabel)}(?:\\\\*\\\\*)?\\\\s*:?`,\n      \"i\"\n    );\n\n    const endMatch =\n      endPattern.exec(remainingText);\n\n\n    if (endMatch) {\n\n      const possibleEnd =\n        startIndex + endMatch.index;\n\n      if (possibleEnd < endIndex) {\n        endIndex = possibleEnd;\n      }\n    }\n  }\n\n\n  return cleanText(\n    text.slice(startIndex, endIndex)\n  );\n}\n\n\n// ------------------------------------------------------\n// 3. EXTRACT SCORE\n// ------------------------------------------------------\n\nlet score = null;\n\n\n// Format:\n// Candidate Score: 83 / 100\nlet scoreMatch = text.match(\n  /Candidate\\s*Score\\s*:?\\s*\\*{0,2}\\s*(\\d{1,3})\\s*\\/\\s*100/i\n);\n\n\n// Format:\n// Score: 83 / 100\nif (!scoreMatch) {\n\n  scoreMatch = text.match(\n    /\\bScore\\s*:?\\s*\\*{0,2}\\s*(\\d{1,3})\\s*\\/\\s*100/i\n  );\n\n}\n\n\n// Format:\n// Candidate Score: 83\nif (!scoreMatch) {\n\n  scoreMatch = text.match(\n    /Candidate\\s*Score\\s*:?\\s*\\*{0,2}\\s*(\\d{1,3})\\b/i\n  );\n\n}\n\n\n// General fallback:\n// 83 / 100\nif (!scoreMatch) {\n\n  scoreMatch = text.match(\n    /\\b(\\d{1,3})\\s*\\/\\s*100\\b/\n  );\n\n}\n\n\nif (scoreMatch) {\n\n  score = Number(scoreMatch[1]);\n\n}\n\n\n// Validate score\nif (\n  score === null ||\n  Number.isNaN(score) ||\n  score < 0 ||\n  score > 100\n) {\n\n  throw new Error(\n    \"Could not extract a valid candidate score from AI Agent output.\\n\\nAI OUTPUT:\\n\" +\n    text\n  );\n\n}\n\n\n// ------------------------------------------------------\n// 4. STRONG POINTS\n// ------------------------------------------------------\n\nconst strong_point = getSection(\n\n  \"Strong Points\",\n\n  [\n    \"Weak Points\",\n    \"Skills Match\",\n    \"Experience Match\",\n    \"Education Match\",\n    \"Job Fit\",\n    \"Recruitment Decision\",\n    \"Short Reasoning\"\n  ]\n\n);\n\n\n// ------------------------------------------------------\n// 5. WEAK POINTS\n// ------------------------------------------------------\n\nconst weak_point = getSection(\n\n  \"Weak Points\",\n\n  [\n    \"Skills Match\",\n    \"Experience Match\",\n    \"Education Match\",\n    \"Job Fit\",\n    \"Recruitment Decision\",\n    \"Short Reasoning\"\n  ]\n\n);\n\n\n// ------------------------------------------------------\n// 6. SKILLS MATCH\n// ------------------------------------------------------\n\nconst skills_match = getSection(\n\n  \"Skills Match\",\n\n  [\n    \"Experience Match\",\n    \"Education Match\",\n    \"Job Fit\",\n    \"Recruitment Decision\",\n    \"Short Reasoning\"\n  ]\n\n);\n\n\n// ------------------------------------------------------\n// 7. EXPERIENCE MATCH\n// ------------------------------------------------------\n\nconst experience_match = getSection(\n\n  \"Experience Match\",\n\n  [\n    \"Education Match\",\n    \"Job Fit\",\n    \"Recruitment Decision\",\n    \"Short Reasoning\"\n  ]\n\n);\n\n\n// ------------------------------------------------------\n// 8. EDUCATION MATCH\n// ------------------------------------------------------\n\nconst education_match = getSection(\n\n  \"Education Match\",\n\n  [\n    \"Job Fit\",\n    \"Recruitment Decision\",\n    \"Short Reasoning\"\n  ]\n\n);\n\n\n// ------------------------------------------------------\n// 9. JOB FIT\n// ------------------------------------------------------\n\nlet fit_for_job = getSection(\n\n  \"Job Fit\",\n\n  [\n    \"Recruitment Decision\",\n    \"Short Reasoning\"\n  ]\n\n);\n\n\n// ------------------------------------------------------\n// 10. RECRUITMENT DECISION\n// ------------------------------------------------------\n\nlet recommendation = getSection(\n\n  \"Recruitment Decision\",\n\n  [\n    \"Short Reasoning\"\n  ]\n\n);\n\n\n// ------------------------------------------------------\n// 11. SHORT REASONING\n// ------------------------------------------------------\n\nconst short_reasoning = getSection(\n\n  \"Short Reasoning\",\n\n  []\n\n);\n\n\n// ------------------------------------------------------\n// 12. NORMALIZE JOB FIT\n// ------------------------------------------------------\n\nlet fit_category = \"\";\n\nconst fitText =\n  fit_for_job.toLowerCase();\n\n\nif (fitText.includes(\"strong fit\")) {\n\n  fit_category = \"Strong Fit\";\n\n}\nelse if (fitText.includes(\"good fit\")) {\n\n  fit_category = \"Good Fit\";\n\n}\nelse if (fitText.includes(\"partial fit\")) {\n\n  fit_category = \"Partial Fit\";\n\n}\nelse if (fitText.includes(\"weak fit\")) {\n\n  fit_category = \"Weak Fit\";\n\n}\nelse if (fitText.includes(\"not a fit\")) {\n\n  fit_category = \"Not a Fit\";\n\n}\n\n\n// If AI forgot Job Fit, calculate from score\nif (!fit_category) {\n\n  if (score >= 90) {\n\n    fit_category = \"Strong Fit\";\n\n  }\n  else if (score >= 75) {\n\n    fit_category = \"Good Fit\";\n\n  }\n  else if (score >= 60) {\n\n    fit_category = \"Partial Fit\";\n\n  }\n  else if (score >= 40) {\n\n    fit_category = \"Weak Fit\";\n\n  }\n  else {\n\n    fit_category = \"Not a Fit\";\n\n  }\n\n}\n\n\n// ------------------------------------------------------\n// 13. NORMALIZE RECOMMENDATION\n// ------------------------------------------------------\n\nlet recruitment_decision = \"\";\n\nconst recommendationText =\n  recommendation.toLowerCase();\n\n\nif (recommendationText.includes(\"shortlist\")) {\n\n  recruitment_decision = \"Shortlist\";\n\n}\nelse if (recommendationText.includes(\"consider\")) {\n\n  recruitment_decision = \"Consider\";\n\n}\nelse if (recommendationText.includes(\"reject\")) {\n\n  recruitment_decision = \"Reject\";\n\n}\n\n\n// Calculate decision if AI omitted it\nif (!recruitment_decision) {\n\n  if (score >= 75) {\n\n    recruitment_decision = \"Shortlist\";\n\n  }\n  else if (score >= 60) {\n\n    recruitment_decision = \"Consider\";\n\n  }\n  else {\n\n    recruitment_decision = \"Reject\";\n\n  }\n\n}\n\n\n// ------------------------------------------------------\n// 14. GET GOOGLE SHEETS ROW NUMBER\n// ------------------------------------------------------\n\nlet row_number = null;\n\n\n// First try current item\nif ($json.row_number) {\n\n  row_number = $json.row_number;\n\n}\n\n\n// Otherwise get it from original Google Sheets node\nif (!row_number) {\n\n  try {\n\n    row_number =\n      $('Get row(s) in sheet').item.json.row_number;\n\n  }\n  catch (error) {\n\n    row_number = null;\n\n  }\n\n}\n\n\n// ------------------------------------------------------\n// 15. FINAL ATS OUTPUT\n// ------------------------------------------------------\n\nreturn [\n  {\n    json: {\n\n      row_number: row_number,\n\n      score: score,\n\n      strong_point:\n        strong_point || \"Not enough information provided.\",\n\n      weak_point:\n        weak_point || \"No major weaknesses identified.\",\n\n      skills_match:\n        skills_match || \"Not enough information provided.\",\n\n      experience_match:\n        experience_match || \"Not enough information provided.\",\n\n      education_match:\n        education_match || \"Not enough information provided.\",\n\n      fit_for_job:\n        fit_category,\n\n      recommendation:\n        recruitment_decision,\n\n      short_reasoning:\n        short_reasoning || \"Not enough information provided.\"\n\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1168,
+        -272
+      ],
+      "id": "415335a4-9428-48f1-bb72-4c15fc80cc87",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SHEET_OR_RESOURCE_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_SHEET_NAME",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET_URL"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 170782118,
+          "mode": "list",
+          "cachedResultName": "YOUR_SHEET_NAME",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET_URL"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Get row(s) in sheet').item.json.row_number }}",
+            "strong point ": "={{ $json.strong_point }}",
+            "weak point": "={{ $json.weak_point }}",
+            "fit or no": "={{ $json.fit_for_job }}",
+            "recommendation": "={{ $json.recommendation }}",
+            "score": "={{ $json.score }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CV",
+              "displayName": "CV",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "strong point ",
+              "displayName": "strong point ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "weak point",
+              "displayName": "weak point",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fit or no",
+              "displayName": "fit or no",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recommendation",
+              "displayName": "recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1392,
+        -144
+      ],
+      "id": "c6db8d01-df64-4aca-8c82-7e0133b6f272",
+      "name": "Update row in sheet"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
